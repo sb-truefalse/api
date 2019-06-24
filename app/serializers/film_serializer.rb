@@ -16,6 +16,10 @@ class FilmSerializer < ApplicationSerializer
   	{
       origin_title: hash[:origin_title],
       title: hash[:title],
+      year: hash[:year],
+      rating: hash[:rating],
+      genres: hash[:genres],
+      countries: hash[:countries],
     }
   end
 end

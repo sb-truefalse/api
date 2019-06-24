@@ -8,11 +8,12 @@ def generate_films(count, opts={})
       local: opts[:local],
       title: "#{opts[:title]} #{i}",
       description: Lorem_Ipsum,
-      date: Date.new(2010+i,1,1),
+      date: Date.new(2010+i+1,1,1),
       rating: i,
       avatar: Avatar,
       genre_ids: [ i, 6],
-      film_countries_attributes: [{country: 'RU'}, {country: 'UA'}],
+      film_countries_attributes: [{country: 'CN'}, {country: opts[:country]}],
+      locale: I18n.default_locale,
     }
   end
 end
@@ -28,11 +29,24 @@ if true
   ])
 end
 
+FILM_NAMES = [
+  {en: 'Spider Man', ru: 'Человек Паук'},
+  {en: 'Nu pogodi!', ru: 'Ну погоди'},
+  {en: 'Tom & Jerry', ru: 'Том и Джери'},
+  {en: 'Neznaika', ru: 'Незнайка'}
+]
+
 if true
-  Film.create([
-    generate_films(5, local: 'en', title: "Spider Man"),
-    generate_films(5, local: 'ru', title: "Ну погоди!"),
-    generate_films(5, local: 'en', title: "Tom & Jerry"),
-    generate_films(5, local: 'ru', title: "Незнайка"),
+  group_films = Film.create([
+    generate_films(5, local: 'en', title: FILM_NAMES[0][:en], country: 'US'),
+    generate_films(5, local: 'ru', title: FILM_NAMES[1][:en], country: 'RU'),
+    generate_films(5, local: 'en', title: FILM_NAMES[2][:en], country: 'US'),
+    generate_films(5, local: 'ru', title: FILM_NAMES[3][:en], country: 'RU'),
   ])
+
+  group_films.each_with_index do |films, i|
+    films.each_with_index do |film, j| 
+      film.update_attributes({title: "#{FILM_NAMES[i][:ru]} #{j+1}", locale: :ru })
+    end
+  end
 end

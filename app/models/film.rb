@@ -44,6 +44,8 @@ class Film < ApplicationRecord
     films = films.where(rating: filters[:rating]) if filters.include? :rating
     films = films.by_genres(filters[:genres]) if filters.include? :genres
     return films
+  rescue
+    self
   end
 
   def self.sorted(sort)
@@ -55,6 +57,8 @@ class Film < ApplicationRecord
     else
       order(created_at: :desc) # order(nil)
     end
+  rescue
+    self
   end
 
   def self.by_year(year)

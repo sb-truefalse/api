@@ -1,6 +1,6 @@
 class Api::V1::FilmsController < Api::V1::ApplicationController
   def index
-    films_paginated = Film.recent.filtered(filter_params).sorted(sort_params).
+    films_paginated = Film.recent.filtered(filters_params).sorted(sort_params).
       page(current_page).per(per_page)
     # For 'fast_jsonapi'
     #opts = {
@@ -71,9 +71,9 @@ class Api::V1::FilmsController < Api::V1::ApplicationController
       ActionController::Parameters.new
   end
 
-  def filter_params
-    params[:filter][:genres] ||= [] # filter[genres][]=1&filter[genres][]=2
-    params.require(:filter).
+  def filters_params
+    params[:filters][:genres] ||= [] # filters[genres][]=1&filters[genres][]=2
+    params.require(:filters).
       permit(:title, :year, :rating, :country , genres: []).delete_if {|key, value| value.empty?}
   rescue
     ActionController::Parameters.new

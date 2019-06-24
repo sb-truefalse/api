@@ -17,11 +17,11 @@ RSpec.describe Api::V1::FilmsController, type: :controller do
 				expect(json_data[index]['attributes']).to eq({
 					'title' => film.title,
 					#'description' => film.description,
-					#'countries' => [],
-					#'genres' => [],
+					'countries' => [],
+					'genres' => [],
 					'origin-title' => film.origin_title,
-					#'rating' => film.rating,
-					#'year' => film.year,
+					'rating' => film.rating,
+					'year' => film.year,
 					#'avatar' => {"url" => nil}
 				})
 			end

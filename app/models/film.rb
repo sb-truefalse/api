@@ -6,7 +6,8 @@ class Film < ApplicationRecord
   
   mount_uploader :avatar, AvatarUploader
   translates :title, fallbacks_for_empty_translations: true
-  
+  paginates_per 50
+
   validates :title, presence: true
   validates :rating, inclusion: { in: 1..10, message: "must be range 0..10" }, allow_nil: true
 
@@ -71,12 +72,12 @@ class Film < ApplicationRecord
     end
   end
 
-  def self.by_genres(code)
+  def self.by_genres(genres)
     joins(:genres).where(genres: { id: genres })
   end
 
-  def self.by_country(genres)
-    joins(:film_countries).where(film_countries: { country: genres })
+  def self.by_country(code)
+    joins(:film_countries).where(film_countries: { country: code })
   end
 
   def with_translations(*locales)

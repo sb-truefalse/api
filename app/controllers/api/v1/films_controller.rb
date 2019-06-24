@@ -10,7 +10,8 @@ class Api::V1::FilmsController < Api::V1::ApplicationController
     #    last: api_v1_films_path(page: films_paginated.total_pages, per_page: per_page)
     #  }
     #}
-    render json: films_paginated #, opts: opts
+    #render json: films_paginated, each_serializer: FilmsSerializer, scope: :index#, opts: opts
+    render json: films_paginated, scope: :index #each_serializer: FilmSerializer, scope: 'index'#, opts: opts
   end
 
   def show

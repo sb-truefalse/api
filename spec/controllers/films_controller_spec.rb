@@ -16,13 +16,13 @@ RSpec.describe Api::V1::FilmsController, type: :controller do
 			Film.recent.each_with_index do |film, index|
 				expect(json_data[index]['attributes']).to eq({
 					'title' => film.title,
-					'description' => film.description,
-					'countries' => [],
-					'genres' => [],
+					#'description' => film.description,
+					#'countries' => [],
+					#'genres' => [],
 					'origin-title' => film.origin_title,
-					'rating' => film.rating,
-					'year' => film.year,
-					'avatar' => {"url" => nil}
+					#'rating' => film.rating,
+					#'year' => film.year,
+					#'avatar' => {"url" => nil}
 				})
 			end
 		end

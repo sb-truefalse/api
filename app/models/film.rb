@@ -58,9 +58,13 @@ class Film < ApplicationRecord
   end
 
   def self.by_year(year)
-    where("cast(strftime('%Y', date) as int) = ?", year)
-  rescue
-    where('extract(year from date_column) = ?', year)
+    where('extract(year from date) = ?', year)
+  end
+
+  if Rails.configuration.database_configuration[Rails.env].try(:[], 'adapter')
+    def self.by_year(year)
+      where("cast(strftime('%Y', date) as int) = ?", year)
+    end
   end
 
   def self.by_genres(code)

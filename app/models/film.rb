@@ -13,6 +13,7 @@ class Film < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
   before_create :locale_default
+  before_validation :countries_destroy, on: :update
 
   def locale
     self.local.try(:to_sym) || I18n.default_locale
@@ -91,6 +92,23 @@ class Film < ApplicationRecord
     else
       with_translations
     end
+  end
+
+  # bad method
+  def countries_destroy
+    names = []
+    new_f_c  = []
+    old_f_c  = []
+
+    film_countries.each do |f_c| 
+      if f_c.id.nil? && !names.include?(f_c.country)
+        names << f_c.country
+        new_f_c << f_c
+      else
+        old_f_c << f_c
+      end
+    end
+    old_f_c.each(&:destroy) if new_f_c.count > 0 && old_f_c.count > 0
   end
 
 end

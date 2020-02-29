@@ -10,7 +10,7 @@ gem 'countries'
 #gem 'fast_jsonapi'
 gem 'globalize', git: 'https://github.com/globalize/globalize'
 gem 'kaminari'
-gem 'puma', '~> 3.11'
+gem 'puma', '~> 3.12'
 gem 'rails', '~> 5.2.3'
 
 group :development, :test do

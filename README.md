@@ -49,6 +49,6 @@ get |/||countries list
 git clone git@github.com:sb-truefalse/kino_api.git
 bundle install
 rails db:migrate
-AVATAR_PATH=:image_path rails db:seed #optional
+AVATAR_PATH=:image_path GEN_SEED=true rails db:seed # optional
 rails s
 ```

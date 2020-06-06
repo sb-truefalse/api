@@ -1,31 +1,32 @@
 class Country < ApplicationRecord
-	def self.all
-		ISO3166::Country.all.map do |country|
+  private_class_method :_serializer
+
+  def self.all
+    ISO3166::Country.all.map do |country|
       {
         id: country.alpha2,
         name: country.translations[I18n.locale.to_s]
       }
     end
-	end
+  end
 
-	def self.count
-	  ISO3166::Country.all.count
-	end
+  def self.count
+    ISO3166::Country.all.count
+  end
 
-	def self.serializer(countries)
-		countries.class == Array ?
-		  { data: countries.map { |country|  _serializer(country) } } : 
-		    { data: _serializer(countries) }
-	end
+  def self.serializer(countries)
+    return { data: _serializer(countries) } unless countries.class == Array
 
-	private
-	def self._serializer(country)
-		{
-			type: :countries,
-			id: country[:id],
-			attributes: {
-				name: country[:name],
-			}
-		}
-	end
+    { data: countries.map { |country| _serializer(country) } }
+  end
+
+  def self._serializer(country)
+    {
+      type: :countries,
+      id: country[:id],
+      attributes: {
+        name: country[:name]
+      }
+    }
+  end
 end

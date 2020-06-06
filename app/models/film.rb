@@ -3,20 +3,22 @@ class Film < ApplicationRecord
   has_many :genres, -> { select(:id, :title) }, through: :film_genres
   has_many :film_countries, dependent: :destroy
   accepts_nested_attributes_for :film_countries
-  
+
   mount_uploader :avatar, AvatarUploader
   translates :title, fallbacks_for_empty_translations: true
   paginates_per 50
 
   validates :title, presence: true
-  validates :rating, inclusion: { in: 1..10, message: "must be range 0..10" }, allow_nil: true
+  validates :rating,
+            inclusion: { in: 1..10, message: 'must be range 0..10' },
+            allow_nil: true
 
   scope :recent, -> { order(created_at: :desc) }
   before_create :locale_default
   before_validation :countries_destroy, on: :update
 
   def locale
-    self.local.try(:to_sym) || I18n.default_locale
+    local.try(:to_sym) || I18n.default_locale
   end
 
   def origin_title
@@ -24,18 +26,18 @@ class Film < ApplicationRecord
   end
 
   def countries
-    film_countries.map do |f_c| 
+    film_countries.map do |f_c|
       country = ISO3166::Country[f_c.country]
-      {id: country.alpha2, name: country.translations[I18n.locale.to_s]}
+      { id: country.alpha2, name: country.translations[I18n.locale.to_s] }
     end
   end
 
   def year
-    self.date.try(:year)
+    date.try(:year)
   end
 
   def locale_default
-    self.local||= I18n.default_locale.to_s
+    self.local ||= I18n.default_locale.to_s
   end
 
   def self.filtered(filters)
@@ -45,19 +47,18 @@ class Film < ApplicationRecord
     films = films.by_country(filters[:country]) if filters.include? :country
     films = films.where(rating: filters[:rating]) if filters.include? :rating
     films = films.by_genres(filters[:genres]) if filters.include? :genres
-    return films
+    films
   rescue
     self
   end
 
   def self.sorted(sort)
-    case
-    when sort[:year]
+    if sort[:year]
       order(date: sort[:year])
-    when sort[:rating]
+    elsif sort[:rating]
       order(rating: sort[:rating])
     else
-      order(created_at: :desc) # order(nil)
+      order(created_at: :desc)
     end
   rescue
     self
@@ -81,11 +82,11 @@ class Film < ApplicationRecord
     joins(:film_countries).where(film_countries: { country: code })
   end
 
-  def with_translations(*locales)
-    locales||= translated_locales
-    includes(:translations).with_locales(I18n.locale.to_s).with_required_attributes
+  def with_translations
+    includes(:translations).with_locales(I18n.locale.to_s)
+                           .with_required_attributes
   end
-  
+
   def self.search(search)
     if search
       with_translations.where('title LIKE ?', "%#{search}%")
@@ -94,13 +95,13 @@ class Film < ApplicationRecord
     end
   end
 
-  # bad method
+  # TODO: uses optimal algorithm
   def countries_destroy
     names = []
-    new_f_c  = []
-    old_f_c  = []
+    new_f_c = []
+    old_f_c = []
 
-    film_countries.each do |f_c| 
+    film_countries.each do |f_c|
       if f_c.id.nil? && !names.include?(f_c.country)
         names << f_c.country
         new_f_c << f_c
@@ -108,7 +109,9 @@ class Film < ApplicationRecord
         old_f_c << f_c
       end
     end
-    old_f_c.each(&:destroy) if new_f_c.count > 0 && old_f_c.count > 0
-  end
 
+    return if new_f_c.count.zero? || old_f_c.count.zero?
+
+    old_f_c.each(&:destroy)
+  end
 end

@@ -1,17 +1,12 @@
 class Api::V1::FilmsController < Api::V1::ApplicationController
   def index
-    films_paginated = Film.recent.filtered(filters_params).sorted(sort_params).
-      page(current_page).per(per_page)
-    # For 'fast_jsonapi'
-    #opts = {
-    #  links: {
-    #    first: api_v1_films_path(per_page: per_page),
-    #    self: api_v1_films_path(page: current_page, per_page: per_page),
-    #    last: api_v1_films_path(page: films_paginated.total_pages, per_page: per_page)
-    #  }
-    #}
-    #render json: films_paginated, each_serializer: FilmsSerializer, scope: :index#, opts: opts
-    render json: films_paginated, scope: :index #each_serializer: FilmSerializer, scope: 'index'#, opts: opts
+    films_paginated = Film.recent
+                          .filtered(filters_params)
+                          .sorted(sort_params)
+                          .page(current_page)
+                          .per(per_page)
+
+    render json: films_paginated, scope: :index
   end
 
   def show
@@ -24,63 +19,66 @@ class Api::V1::FilmsController < Api::V1::ApplicationController
     film.save!
     render json: film, status: :created
   rescue
-    render json: film, adapter: :json_api, 
-    serializer: ActiveModel::Serializer::ErrorSerializer,
-    status: :unprocessable_entity
+    render_unprocessable_entity
   end
 
   def update
-    film = Film.find(params[:id])
+    film = find_film
     film.update_attributes!(film_params)
     render json: film, status: :ok
   rescue
-    render json: film, adapter: :json_api,
-      serializer: ActiveModel::Serializer::ErrorSerializer,
-      status: :unprocessable_entity
+    render_unprocessable_entity
   end
 
   def destroy
-    film = Film.find(params[:id])
+    film = find_film
     film.destroy
     head :no_content
+  end
+
+  protected
+
+  def find_film
+    Film.find(params[:id])
+  end
+
+  def render_unprocessable_entity(film)
+    render json: film,
+           adapter: :json_api,
+           serializer: ActiveModel::Serializer::ErrorSerializer,
+           status: :unprocessable_entity
   end
 
   private
 
   def film_params
-    params.require(:data).require(:attributes).
-      permit(
-        :local,
-        :title,
-        :date,
-        :description,
-        :rating,
-        :avatar,
-        #?genre_ids[]=1&genre_ids[]=2
-        genre_ids: [],
-        #?film_countries_attributes[][country]=RU&film_countries_attributes[][country]=UA
-        film_countries_attributes: [[:country]]
-      ) ||
-    ActionController::Parameters.new
-  end
-
-  def sort_params
-    # value: ASC || DESC
-    params[:sort] ? params.require(:sort).
-      permit(:year, :rating).delete_if {|key, value| value.empty? } :
+    params.require(:data)
+          .require(:attributes)
+          .permit(
+            :local,
+            :title,
+            :date,
+            :description,
+            :rating,
+            :avatar,
+            genre_ids: [],
+            film_countries_attributes: [[:country]]
+          ) ||
       ActionController::Parameters.new
   end
 
+  def sort_params
+    return ActionController::Parameters.new unless params[:sort]
+
+    delete_empty_params params.require(:sort).permit(:year, :rating)
+  end
+
   def filters_params
-    params[:filters][:genres] ||= [] # filters[genres][]=1&filters[genres][]=2
-    params.require(:filters).
-      permit(:title, :year, :rating, :country , genres: []).delete_if {|key, value| value.empty?}
+    params[:filters][:genres] ||= []
+    delete_empty_params params.require(:filters).permit(
+      :title, :year, :rating, :country, genres: []
+    )
   rescue
     ActionController::Parameters.new
   end
-
-  # For 'fast_jsonapi'
-  # def serializer
-    # FilmSerializer
-  # end
 end

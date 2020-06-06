@@ -1,6 +1,4 @@
 class Country < ApplicationRecord
-  private_class_method :_serializer
-
   def self.all
     ISO3166::Country.all.map do |country|
       {

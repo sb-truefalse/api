@@ -5,7 +5,7 @@ ruby '2.5.1'
 
 gem 'active_model_serializers', '~> 0.10.9'
 gem 'bootsnap', '>= 1.1.0', require: false
-gem 'carrierwave', '~> 1.0'
+gem 'carrierwave', '~> 1.3'
 gem 'countries'
 gem 'globalize', git: 'https://github.com/globalize/globalize'
 gem 'kaminari'
